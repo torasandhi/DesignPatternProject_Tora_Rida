@@ -1,0 +1,40 @@
+# Build files
+build/
+bin/
+*.o
+*.obj
+*.exe
+*.out
+*.a
+*.lib
+*.dll
+*.so
+*.dylib
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# VS Code
+.vscode/
+
+# CLion
+.idea/
+cmake-build-*/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Raylib compiled libraries (optional)
+raylib/src/*.o
+raylib/src/*.obj
+raylib/libraylib.*
+
+# Logs
+*.log
