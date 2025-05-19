@@ -1,9 +1,8 @@
 #ifndef ISUBJECT_H
 #define ISUBJECT_H
 
+#include "IObserver.h"
 #include <vector>
-
-class IObserver; 
 
 class ISubject
 {

@@ -1,10 +1,9 @@
 #ifndef GAME_EVENT_MANAGER_H
 #define GAME_EVENT_MANAGER_H
 
-#include <vector>
 #include "ISubject.h"
-
-class IObserver; // Forward declaration
+#include "IObserver.h"
+#include <vector> 
 
 class GameEventManager : public ISubject
 {
