@@ -8,7 +8,7 @@ class ScoreDisplay : public IObserver
 {
 public:
     ScoreDisplay(int x, int y, int fontSize, Color color);
-    void updateScore(int playerScore, int opponentScore) override;
+    void updateScore(int player1Score, int player2Score) override;
     void draw() const;
 
 private:
@@ -16,8 +16,8 @@ private:
     int y_;
     int fontSize_;
     Color color_;
-    int playerScore_;
-    int opponentScore_;
+    int player1Score_;
+    int player2Score_;
 };
 
-#endif // SCORE_DISPLAY_
+#endif // SCORE_DISPLAY_H

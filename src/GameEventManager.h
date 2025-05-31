@@ -3,35 +3,30 @@
 
 #include "ISubject.h"
 #include "IObserver.h"
-#include <vector> 
+#include <vector>
 
 class GameEventManager : public ISubject
 {
 private:
     std::vector<IObserver *> observers_;
-    int playerScore_;
-    int opponentScore_;
+    int player1Score_;
+    int player2Score_;
+    static GameEventManager *instance_; // Add static instance pointer
 
-    // Private constructor for singleton
     GameEventManager();
 
 public:
     static GameEventManager &getInstance();
 
-    // Delete copy constructor and assignment operator
-    GameEventManager(const GameEventManager &) = delete;
-    GameEventManager &operator=(const GameEventManager &) = delete;
-
-    // ISubject interface implementations
     void attach(IObserver *observer) override;
     void detach(IObserver *observer) override;
     void notifyScoreChanged() override;
 
-    // Game-specific methods
-    void incrementPlayerScore();
-    void incrementOpponentScore();
-    int getPlayerScore() const;
-    int getOppoentScore() const;
+    void incrementPlayer1Score();
+    void incrementPlayer2Score();
+
+    int getPlayer1Score() const;
+    int getPlayer2Score() const;
 };
 
-#endif
+#endif // GAME_EVENT_MANAGER_H

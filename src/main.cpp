@@ -4,154 +4,151 @@
 #include <cstdlib>
 #include <ctime>
 
-// Constants
 const int screenWidth = 800;
 const int screenHeight = 600;
 const int paddleWidth = 10;
 const int paddleHeight = 80;
 const int ballRadius = 10;
-const int paddleSpeed = 400;
-const int ballSpeed = 300;
+const float paddleSpeed = 400;
+const float initialBallSpeed = 300;
 
 int main()
 {
-    // Seed random number generator
-    std::srand(std::time(nullptr));
 
-    // inisialisasi screen tinggi layar
+#pragma region inisialisasi
+    // initialize screen
     InitWindow(screenWidth, screenHeight, "Pong Game");
     SetTargetFPS(60);
 
-    // Initialize Game Event Manager and Score Display
+    // Singleton
     GameEventManager &eventManager = GameEventManager::getInstance();
-    ScoreDisplay scoreDisplay(screenWidth / 2 - 150, 20, 20, WHITE); // Centered at the top
+    // Display UI
+    ScoreDisplay scoreDisplay(screenWidth / 2 - 150, 20, 20, WHITE);
     eventManager.attach(&scoreDisplay);
 
-    // Initialize Player and opponent Paddles
-    float playerX = 30; 
-    float playerY = screenHeight / 2 - paddleHeight / 2;
-    float opponentX = screenWidth - 30 - paddleWidth;
-    float opponentY = screenHeight / 2 - paddleHeight / 2;
+    float player1X = 30;
+    float player1Y = screenHeight / 2 - paddleHeight / 2;
 
-    // Initialize Ball
+    float player2X = screenWidth - 30 - paddleWidth;
+    float player2Y = screenHeight / 2 - paddleHeight / 2;
+
     float ballX = screenWidth / 2;
     float ballY = screenHeight / 2;
-    float ballSpeedX = ballSpeed;
-    float ballSpeedY = ballSpeed;
+    float ballSpeedX = initialBallSpeed * (GetRandomValue(0, 1) * 2 - 1);
+    float ballSpeedY = initialBallSpeed * (GetRandomValue(-100, 100) / 100.0f);
+#pragma endregion
 
-    // Game Loop
     while (!WindowShouldClose())
     {
         float deltaTime = GetFrameTime();
 
-        // Input Handling (Player)
+#pragma region input
         if (IsKeyDown(KEY_W))
         {
-            playerY -= paddleSpeed * deltaTime;
-            if (playerY < 0)
-                playerY = 0;
+            player1Y -= paddleSpeed * deltaTime;
+            if (player1Y < 0)
+                player1Y = 0;
         }
         if (IsKeyDown(KEY_S))
         {
-            playerY += paddleSpeed * deltaTime;
-            if (playerY > screenHeight - paddleHeight)
-                playerY = screenHeight - paddleHeight;
+            player1Y += paddleSpeed * deltaTime;
+            if (player1Y > screenHeight - paddleHeight)
+                player1Y = screenHeight - paddleHeight;
         }
 
-        // AI Control (opponent) - Simple AI
-        // else if (ballY < opponentY + paddleHeight / 2)
         if (IsKeyDown(KEY_UP))
         {
-            opponentY -= paddleSpeed * deltaTime * 0.8f;
-            if (opponentY < 0)
-                opponentY = 0;
+            player2Y -= paddleSpeed * deltaTime;
+            if (player2Y < 0)
+                player2Y = 0;
         }
-        // if (ballY > opponentY + paddleHeight / 2)
-        else if (IsKeyDown(KEY_DOWN))
+        if (IsKeyDown(KEY_DOWN))
         {
-            opponentY += paddleSpeed * deltaTime * 0.8f; // Slightly slower than player
-            if (opponentY > screenHeight - paddleHeight)
-                opponentY = screenHeight - paddleHeight;
+            player2Y += paddleSpeed * deltaTime;
+            if (player2Y > screenHeight - paddleHeight)
+                player2Y = screenHeight - paddleHeight;
         }
+#pragma endregion
 
-        // Ball Movement
+#pragma region collision
         ballX += ballSpeedX * deltaTime;
         ballY += ballSpeedY * deltaTime;
 
-        // Ball Collision with Top/Bottom Walls
-        if (ballY < ballRadius || ballY > screenHeight - ballRadius)
+        // bounce ball if y-axis out of bounds
+        if (ballY - ballRadius < 0 || ballY + ballRadius > screenHeight)
         {
             ballSpeedY *= -1;
         }
 
-        // Ball Collision with Paddles
-        if (ballX - ballRadius < playerX + paddleWidth &&
-            ballX + ballRadius > playerX &&
-            ballY + ballRadius > playerY &&
-            ballY - ballRadius < playerY + paddleHeight)
+        // collision dengan paddle player 1
+        if (ballX - ballRadius < player1X + paddleWidth &&
+            ballX + ballRadius > player1X &&
+            ballY + ballRadius > player1Y &&
+            ballY - ballRadius < player1Y + paddleHeight)
         {
-            // Only bounce if moving toward paddle (prevents getting stuck)
             if (ballSpeedX < 0)
             {
-                ballSpeedX *= -1.05f; // Slightly increase speed on bounce
-                // Add a small random change to Y velocity for more dynamic gameplay
-                ballSpeedY += (float)(GetRandomValue(-100, 100) / 100.0f) * ballSpeed * 0.25f;
+                ballSpeedX *= -1.05f; // increase speed sedikit setelah collision
+                ballSpeedY = (ballY - (player1Y + paddleHeight / 2)) / (paddleHeight / 2) * initialBallSpeed * 0.75f;
             }
         }
-        else if (ballX + ballRadius > opponentX &&
-                 ballX - ballRadius < opponentX + paddleWidth &&
-                 ballY + ballRadius > opponentY &&
-                 ballY - ballRadius < opponentY + paddleHeight)
+
+        // collision dengan paddle player 2
+        else if (ballX + ballRadius > player2X &&
+                 ballX - ballRadius < player2X + paddleWidth &&
+                 ballY + ballRadius > player2Y &&
+                 ballY - ballRadius < player2Y + paddleHeight)
         {
-            // Only bounce if moving toward paddle
             if (ballSpeedX > 0)
             {
-                ballSpeedX *= -1.05f;
-                ballSpeedY += (float)(GetRandomValue(-100, 100) / 100.0f) * ballSpeed * 0.25f;
+                ballSpeedX *= -1.05f; // increase speed sedikit setelah collision
+                ballSpeedY = (ballY - (player2Y + paddleHeight / 2)) / (paddleHeight / 2) * initialBallSpeed * 0.75f;
             }
         }
+#pragma endregion
 
-        // jika bola keluar layar di bagian kiri window/layar
-        if (ballX < 0) 
+#pragma region scoring
+        if (ballX < 0)
         {
+            eventManager.incrementPlayer2Score();
+
             ballX = screenWidth / 2;
             ballY = screenHeight / 2;
-            ballSpeedX = ballSpeed;
-            ballSpeedY = (float)(GetRandomValue(-100, 100) / 100.0f) * ballSpeed * 0.5f;
-            eventManager.incrementOpponentScore();
+
+            ballSpeedX = initialBallSpeed;
+            ballSpeedY = (float)(GetRandomValue(-100, 100) / 100.0f) * initialBallSpeed * 0.5f;
         }
-        //jika keluar layar di bagian kanan window/layar
         else if (ballX > screenWidth)
         {
+            eventManager.incrementPlayer1Score();
+
             ballX = screenWidth / 2;
             ballY = screenHeight / 2;
-            ballSpeedX = -ballSpeed;
-            ballSpeedY = (float)(GetRandomValue(-100, 100) / 100.0f) * ballSpeed * 0.5f;
-            eventManager.incrementPlayerScore();
+
+            ballSpeedX = -initialBallSpeed;
+            ballSpeedY = (float)(GetRandomValue(-100, 100) / 100.0f) * initialBallSpeed * 0.5f;
         }
+#pragma endregion
 
-        // start draw
         BeginDrawing();
-        ClearBackground({20, 160, 133, 255}); // Green background
+        ClearBackground({20, 160, 133, 255});
 
-        // draw garis tengah
-        DrawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, Fade(WHITE, 0.2f));
+        for (int i = 0; i < screenHeight; i += 20)
+        {
+            DrawRectangle(screenWidth / 2 - 1, i, 2, 10, Fade(WHITE, 0.5f));
+        }
         DrawCircle(screenWidth / 2, screenHeight / 2, 70, Fade(WHITE, 0.05f));
 
-        // draw paddle player 1 dan 2
-        DrawRectangle(playerX, playerY, paddleWidth, paddleHeight, WHITE);
-        DrawRectangle(opponentX, opponentY, paddleWidth, paddleHeight, WHITE);
+        DrawRectangle(player1X, player1Y, paddleWidth, paddleHeight, WHITE);
+        DrawRectangle(player2X, player2Y, paddleWidth, paddleHeight, WHITE);
 
-        // draw ball
         DrawCircle(ballX, ballY, ballRadius, WHITE);
 
-        // draw score display
         scoreDisplay.draw();
 
         EndDrawing();
     }
 
-    // Clean up
     CloseWindow();
     return 0;
 }

@@ -1,51 +1,62 @@
 #include "GameEventManager.h"
-#include "IObserver.h"
 #include <algorithm>
 
-GameEventManager::GameEventManager() : playerScore_(0), opponentScore_(0){}
+// Initialize the static instance pointer
+GameEventManager *GameEventManager::instance_ = nullptr;
 
-GameEventManager& GameEventManager::getInstance()
+GameEventManager::GameEventManager() : player1Score_(0), player2Score_(0) {}
+
+// Singleton
+GameEventManager &GameEventManager::getInstance()
 {
-    static GameEventManager instance;
-    return instance;
+    if (instance_ == nullptr)
+    {
+        instance_ = new GameEventManager();
+    }
+    return *instance_;
 }
 
-void GameEventManager::attach(IObserver* observer)
+// attach
+void GameEventManager::attach(IObserver *observer)
 {
     observers_.push_back(observer);
 }
 
-void GameEventManager::detach(IObserver* observer)
+// detach
+void GameEventManager::detach(IObserver *observer)
 {
     observers_.erase(std::remove(observers_.begin(), observers_.end(), observer), observers_.end());
 }
 
+// notify perubahan skor
 void GameEventManager::notifyScoreChanged()
 {
     for (auto observer : observers_)
     {
-        observer->updateScore(playerScore_, opponentScore_);
+        observer->updateScore(player1Score_, player2Score_);
     }
 }
 
-void GameEventManager::incrementPlayerScore()
+// tambah score player 1
+void GameEventManager::incrementPlayer1Score()
 {
-    playerScore_++;
+    player1Score_++;
     notifyScoreChanged();
 }
 
-void GameEventManager::incrementOpponentScore()
+// tambah score player 2
+void GameEventManager::incrementPlayer2Score()
 {
-    opponentScore_++;
+    player2Score_++;
     notifyScoreChanged();
 }
 
-int GameEventManager::getPlayerScore() const
+int GameEventManager::getPlayer1Score() const
 {
-    return playerScore_;
+    return player1Score_;
 }
 
-int GameEventManager::getOppoentScore() const
+int GameEventManager::getPlayer2Score() const
 {
-    return opponentScore_;
+    return player2Score_;
 }
