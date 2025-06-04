@@ -3,7 +3,6 @@ build/
 bin/
 *.o
 *.obj
-*.exe
 *.out
 *.a
 *.lib
