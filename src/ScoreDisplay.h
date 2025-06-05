@@ -20,4 +20,4 @@ private:
     int player2Score_;
 };
 
-#endif // SCORE_DISPLAY_H
+#endif // SCORE_DISPLAY_Hz
